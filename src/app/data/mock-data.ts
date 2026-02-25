@@ -19,7 +19,7 @@ export function generateMockSchedules(): SurgerySchedule[] {
   const surgeryTypes = [
     '阑尾切除术',
     '胆囊切除术',
-    '骨折内固定术',
+    '骨折内固定术222',
     '白内障手术',
     '剖腹产',
     '心脏搭桥术',
