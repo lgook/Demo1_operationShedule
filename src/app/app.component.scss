@@ -1,0 +1,11 @@
+.app-container {
+  min-height: 100vh;
+  padding: 24px;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    padding: 12px;
+  }
+}

@@ -1,0 +1,207 @@
+<div class="surgery-schedule-container">
+  <!-- 页面标题 -->
+  <div class="page-header">
+    <h1>手术排班管理</h1>
+  </div>
+
+  <!-- 工作台工具条 -->
+  <div class="workbench-toolbar">
+    <div class="toolbar-left">
+      <button nz-button nzType="primary" (click)="showCreateForm()">
+        <i nz-icon nzType="plus"></i>
+        手录申请
+      </button>
+      <button nz-button nzType="default" (click)="fetchApplications()">
+        <i nz-icon nzType="cloud-download"></i>
+        获取申请
+      </button>
+      <button nz-button nzType="default" (click)="refresh()">
+        <i nz-icon nzType="reload"></i>
+        刷新
+      </button>
+      <button nz-button nzType="default" (click)="printList()">
+        <i nz-icon nzType="printer"></i>
+        打印列表
+      </button>
+      <button nz-button nzType="default" disabled>合并/拆单</button>
+      <button nz-button nzType="default" disabled>批量操作</button>
+    </div>
+
+    <div class="toolbar-right">
+      <div class="summary-pill">
+        <span class="summary-item">总数 <b>{{ totalCount }}</b></span>
+        <span class="summary-item">急诊 <b class="danger">{{ urgentCount }}</b></span>
+        <span class="summary-item">已选 <b>{{ selectedCount }}</b></span>
+        <span class="summary-sep"></span>
+        <span class="summary-item">未安排 <b>{{ statusCounts['unscheduled'] }}</b></span>
+        <span class="summary-item">已安排 <b>{{ statusCounts['scheduled'] }}</b></span>
+        <span class="summary-item">进行中 <b>{{ statusCounts['in-progress'] }}</b></span>
+        <span class="summary-item">已完成 <b>{{ statusCounts['completed'] }}</b></span>
+        <span class="summary-item">已取消 <b>{{ statusCounts['cancelled'] }}</b></span>
+      </div>
+
+      <div class="toggle-item">
+        <span class="toggle-label">显示诊断</span>
+        <nz-switch [(ngModel)]="showDiagnosis"></nz-switch>
+      </div>
+
+      <nz-radio-group [(ngModel)]="currentView" (ngModelChange)="switchView($event)">
+        <label nz-radio-button nzValue="table">
+          <i nz-icon nzType="table"></i>
+          工作台
+        </label>
+        <label nz-radio-button nzValue="calendar">
+          <i nz-icon nzType="calendar"></i>
+          日历
+        </label>
+      </nz-radio-group>
+    </div>
+  </div>
+
+  <!-- 筛选器（截图式紧凑条） -->
+  <app-schedule-filter
+    (filterChange)="handleFilterChange($event)"
+    (reset)="handleFilterReset()"
+  ></app-schedule-filter>
+
+  <!-- 日历视图 -->
+  <div *ngIf="currentView === 'calendar'" class="calendar-view">
+    <app-schedule-calendar
+      [schedules]="filteredSchedules"
+      [loading]="loading"
+      (eventClick)="handleEventClick($event)"
+      (eventDrop)="handleEventDrop($event)"
+      (dateSelect)="handleDateSelect($event)"
+    ></app-schedule-calendar>
+  </div>
+
+  <!-- 列表视图 -->
+  <div *ngIf="currentView === 'table'" class="table-view">
+    <nz-table
+      #basicTable
+      [nzData]="filteredSchedules"
+      [nzLoading]="loading"
+      [nzScroll]="{ x: '1600px' }"
+      nzSize="small"
+      nzBordered
+      [nzPageSize]="tablePageSize"
+      [nzPageIndex]="tablePageIndex"
+      [nzShowSizeChanger]="true"
+      [nzPageSizeOptions]="[10, 20, 50]"
+      (nzPageIndexChange)="tablePageIndex = $event"
+      (nzPageSizeChange)="tablePageSize = $event"
+    >
+      <thead>
+        <tr>
+          <th
+            nzLeft="0px"
+            nzWidth="44px"
+            [nzChecked]="checked"
+            [nzIndeterminate]="indeterminate"
+            (nzCheckedChange)="onAllChecked($event)"
+          ></th>
+          <th nzLeft="44px" nzWidth="56px">序号</th>
+          <th nzLeft="100px" nzWidth="70px">急/择</th>
+          <th nzLeft="170px" nzWidth="140px">患者</th>
+
+          <th nzWidth="140px">科室/床位</th>
+          <th *ngIf="showDiagnosis" nzWidth="220px">诊断</th>
+          <th nzWidth="200px">手术/拟施手术</th>
+          <th nzWidth="180px">团队</th>
+          <th nzWidth="110px">手术间</th>
+          <th nzWidth="240px">预约时间段</th>
+          <th nzWidth="90px">状态</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let schedule of basicTable.data; let rowIndex = index"
+          [ngClass]="getRowClass(schedule, rowIndex)"
+          (dblclick)="handleEventClick(schedule)"
+        >
+          <td nzLeft="0px" nzWidth="44px">
+            <label
+              nz-checkbox
+              [ngModel]="setOfCheckedId.has(schedule.id)"
+              (ngModelChange)="onItemChecked(schedule.id, $event)"
+            ></label>
+          </td>
+          <td nzLeft="44px" nzWidth="56px">
+            {{ getRowIndex(schedule) }}
+          </td>
+          <td nzLeft="100px" nzWidth="70px">
+            <ng-container *ngIf="schedule.urgency; else noUrgency">
+              <nz-tag [nzColor]="schedule.urgency === 'urgent' ? 'red' : 'blue'">
+                {{ schedule.urgency === 'urgent' ? '急' : '择' }}
+              </nz-tag>
+            </ng-container>
+            <ng-template #noUrgency>-</ng-template>
+          </td>
+          <td nzLeft="170px" nzWidth="140px">
+            <div class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="schedule.patientName">
+              {{ schedule.patientName }}
+            </div>
+            <div class="muted cell-ellipsis" *ngIf="schedule.inpatientNo" nz-tooltip [nzTooltipTitle]="schedule.inpatientNo">
+              住院号: {{ schedule.inpatientNo }}
+            </div>
+          </td>
+          <td nzWidth="140px">
+            <div>{{ schedule.dept || '-' }}</div>
+            <div class="muted" *ngIf="schedule.ward || schedule.bedNo">
+              {{ schedule.ward || '-' }} {{ schedule.bedNo ? ('/' + schedule.bedNo + '床') : '' }}
+            </div>
+          </td>
+          <td *ngIf="showDiagnosis" nzWidth="220px">
+            <span
+              class="cell-ellipsis"
+              nz-tooltip
+              [nzTooltipTitle]="schedule.diagnosis || '-'"
+            >
+              {{ schedule.diagnosis || '-' }}
+            </span>
+          </td>
+          <td nzWidth="200px">
+            <span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="schedule.surgeryType">
+              {{ schedule.surgeryType }}
+            </span>
+          </td>
+          <td nzWidth="180px">
+            <div class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="schedule.doctorName">
+              主刀: {{ schedule.doctorName }}
+            </div>
+            <div class="muted cell-ellipsis" *ngIf="schedule.assistantDoctors.length > 0" nz-tooltip [nzTooltipTitle]="schedule.assistantDoctors.join(', ')">
+              助理: {{ schedule.assistantDoctors.join(', ') }}
+            </div>
+            <div class="muted cell-ellipsis" *ngIf="schedule.anesthetistName" nz-tooltip [nzTooltipTitle]="schedule.anesthetistName">
+              麻醉: {{ schedule.anesthetistName }}
+            </div>
+          </td>
+          <td nzWidth="110px">
+            <span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="schedule.operatingRoom">
+              {{ schedule.operatingRoom }}
+            </span>
+          </td>
+          <td nzWidth="240px">
+            <span class="cell-ellipsis" nz-tooltip [nzTooltipTitle]="formatTimeRange(schedule.startTime, schedule.endTime)">
+              {{ formatTimeRange(schedule.startTime, schedule.endTime) }}
+            </span>
+          </td>
+          <td nzWidth="90px">
+            <nz-tag [nzColor]="getStatusTagColor(schedule.status)">
+              {{ getStatusText(schedule.status) }}
+            </nz-tag>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>
+
+  <!-- 表单弹窗 -->
+  <app-schedule-form
+    [(visible)]="formVisible"
+    [schedule]="selectedSchedule"
+    [prefilledData]="prefilledFormData"
+    (submitSuccess)="handleFormSubmit()"
+    (cancel)="handleFormCancel()"
+  ></app-schedule-form>
+</div>

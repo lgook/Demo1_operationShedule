@@ -1,0 +1,180 @@
+<nz-modal
+  [(nzVisible)]="visible"
+  [nzTitle]="isEditMode ? '编辑排班' : '新建排班'"
+  [nzWidth]="720"
+  [nzFooter]="modalFooter"
+  (nzOnCancel)="handleCancel()"
+>
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="form" nzLayout="vertical">
+      <nz-row [nzGutter]="16">
+        <!-- 患者姓名 -->
+        <nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzRequired>患者姓名</nz-form-label>
+            <nz-form-control nzErrorTip="请输入患者姓名（至少2个字符）">
+              <input nz-input formControlName="patientName" placeholder="请输入患者姓名" />
+            </nz-form-control>
+          </nz-form-item>
+        </nz-col>
+
+        <!-- 手术类型 -->
+        <nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzRequired>手术类型</nz-form-label>
+            <nz-form-control nzErrorTip="请选择手术类型">
+              <nz-select
+                formControlName="surgeryType"
+                nzShowSearch
+                nzAllowClear
+                nzPlaceHolder="请选择手术类型"
+              >
+                <nz-option *ngFor="let type of surgeryTypeOptions" [nzLabel]="type" [nzValue]="type"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </nz-col>
+      </nz-row>
+
+      <nz-row [nzGutter]="16">
+        <!-- 主刀医生 -->
+        <nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzRequired>主刀医生</nz-form-label>
+            <nz-form-control nzErrorTip="请选择主刀医生">
+              <nz-select
+                formControlName="doctorName"
+                nzShowSearch
+                nzAllowClear
+                nzPlaceHolder="请选择主刀医生"
+              >
+                <nz-option *ngFor="let doctor of doctorOptions" [nzLabel]="doctor" [nzValue]="doctor"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </nz-col>
+
+        <!-- 助理医生 -->
+        <nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label>助理医生</nz-form-label>
+            <nz-form-control>
+              <nz-select
+                formControlName="assistantDoctors"
+                nzMode="multiple"
+                nzShowSearch
+                nzAllowClear
+                nzPlaceHolder="请选择助理医生"
+              >
+                <nz-option *ngFor="let doctor of assistantDoctorOptions" [nzLabel]="doctor" [nzValue]="doctor"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </nz-col>
+      </nz-row>
+
+      <nz-row [nzGutter]="16">
+        <!-- 手术室 -->
+        <nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzRequired>手术室</nz-form-label>
+            <nz-form-control nzErrorTip="请选择手术室">
+              <nz-select
+                formControlName="operatingRoom"
+                nzShowSearch
+                nzAllowClear
+                nzPlaceHolder="请选择手术室"
+              >
+                <nz-option *ngFor="let room of operatingRoomOptions" [nzLabel]="room" [nzValue]="room"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </nz-col>
+
+        <!-- 状态 -->
+        <nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzRequired>状态</nz-form-label>
+            <nz-form-control nzErrorTip="请选择状态">
+              <nz-select formControlName="status" nzPlaceHolder="请选择状态">
+                <nz-option
+                  *ngFor="let status of statusOptions"
+                  [nzLabel]="status.label"
+                  [nzValue]="status.value"
+                >
+                  <span [style.color]="status.color">{{ status.label }}</span>
+                </nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </nz-col>
+      </nz-row>
+
+      <nz-row [nzGutter]="16">
+        <!-- 开始时间 -->
+        <nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzRequired>开始时间</nz-form-label>
+            <nz-form-control nzErrorTip="请选择开始时间">
+              <nz-date-picker
+                formControlName="startTime"
+                nzShowTime
+                nzFormat="yyyy-MM-dd HH:mm"
+                nzPlaceHolder="选择开始时间"
+                style="width: 100%;"
+              ></nz-date-picker>
+            </nz-form-control>
+          </nz-form-item>
+        </nz-col>
+
+        <!-- 结束时间 -->
+        <nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label nzRequired>结束时间</nz-form-label>
+            <nz-form-control nzErrorTip="请选择结束时间">
+              <nz-date-picker
+                formControlName="endTime"
+                nzShowTime
+                nzFormat="yyyy-MM-dd HH:mm"
+                nzPlaceHolder="选择结束时间"
+                style="width: 100%;"
+              ></nz-date-picker>
+            </nz-form-control>
+          </nz-form-item>
+        </nz-col>
+      </nz-row>
+
+      <!-- 备注 -->
+      <nz-form-item>
+        <nz-form-label>备注</nz-form-label>
+        <nz-form-control>
+          <textarea
+            nz-input
+            formControlName="notes"
+            placeholder="请输入备注信息"
+            [nzAutosize]="{ minRows: 3, maxRows: 6 }"
+          ></textarea>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-container>
+
+  <ng-template #modalFooter>
+    <button nz-button nzType="default" (click)="handleCancel()" [disabled]="loading">
+      取消
+    </button>
+    <button
+      *ngIf="isEditMode"
+      nz-button
+      nzType="default"
+      nzDanger
+      (click)="handleDelete()"
+      [nzLoading]="loading"
+    >
+      删除
+    </button>
+    <button nz-button nzType="primary" (click)="handleSubmit()" [nzLoading]="loading">
+      {{ isEditMode ? '保存' : '创建' }}
+    </button>
+  </ng-template>
+</nz-modal>

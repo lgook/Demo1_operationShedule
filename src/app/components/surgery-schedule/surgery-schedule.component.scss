@@ -1,0 +1,233 @@
+.surgery-schedule-container {
+  min-height: 100vh;
+}
+
+.workbench-toolbar {
+  background: #fff;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 10px 30px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(5, 5, 5, 0.06);
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 3px;
+    border-radius: 6px 6px 0 0;
+    background: linear-gradient(90deg, #1677ff, #13c2c2);
+    opacity: 0.9;
+  }
+
+  .toolbar-left {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .toolbar-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .summary-pill {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    border: 1px solid rgba(5, 5, 5, 0.06);
+    border-radius: 999px;
+    background: rgba(24, 144, 255, 0.04);
+  }
+
+  .summary-item {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.65);
+
+    b {
+      color: rgba(0, 0, 0, 0.88);
+      font-weight: 600;
+      margin-left: 4px;
+    }
+
+    .danger {
+      color: #f5222d;
+    }
+  }
+
+  .summary-sep {
+    width: 1px;
+    height: 14px;
+    background: rgba(5, 5, 5, 0.12);
+  }
+
+  .toggle-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 8px;
+    border-left: 1px solid rgba(5, 5, 5, 0.06);
+    margin-left: 4px;
+  }
+
+  .toggle-label {
+    color: rgba(0, 0, 0, 0.65);
+    font-size: 13px;
+  }
+}
+
+.calendar-view {
+  animation: fadeIn 0.3s ease-in;
+}
+
+.table-view {
+  background: #fff;
+  padding: 16px;
+  border-radius: 6px;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 10px 30px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(5, 5, 5, 0.06);
+  position: relative;
+  animation: fadeIn 0.3s ease-in;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 3px;
+    border-radius: 6px 6px 0 0;
+    background: linear-gradient(90deg, rgba(22, 119, 255, 0.8), rgba(250, 173, 20, 0.7));
+  }
+
+  .muted {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.45);
+  }
+
+  .cell-ellipsis {
+    display: inline-block;
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: bottom;
+  }
+
+  ::ng-deep {
+    .ant-table {
+      font-size: 14px;
+    }
+
+    .ant-table-thead > tr > th {
+      background-color: #fafafa;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .ant-table-cell-fix-left,
+    .ant-table-cell-fix-right {
+      background: #fff;
+    }
+  }
+}
+
+/* 整行状态色（包含固定列） */
+$rowColors: (
+  unscheduled: #faad14,
+  scheduled: #1677ff,
+  in-progress: #52c41a,
+  completed: #8c8c8c,
+  cancelled: #f5222d
+);
+
+@each $status, $color in $rowColors {
+  tr.row-status-#{$status} > td {
+    background: rgba($color, 0.10);
+  }
+
+  tr.row-status-#{$status} > td.ant-table-cell-fix-left,
+  tr.row-status-#{$status} > td.ant-table-cell-fix-right {
+    background: rgba($color, 0.10);
+  }
+
+  tr.row-status-#{$status}:hover > td {
+    background: rgba($color, 0.14);
+  }
+
+  tr.row-status-#{$status}:hover > td.ant-table-cell-fix-left,
+  tr.row-status-#{$status}:hover > td.ant-table-cell-fix-right {
+    background: rgba($color, 0.14);
+  }
+}
+
+/* 急诊：更明显的左侧标记 */
+tr.row-urgent > td:first-child {
+  border-left: 3px solid #f5222d;
+}
+
+/* 选中行：加深外框提示 */
+tr.row-selected > td {
+  box-shadow: inset 0 0 0 1px rgba(24, 144, 255, 0.35);
+}
+
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .workbench-toolbar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+
+    .toolbar-left,
+    .toolbar-right {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .toolbar-right {
+      nz-radio-group {
+        width: 100%;
+        display: flex;
+
+        label {
+          flex: 1;
+          text-align: center;
+        }
+      }
+    }
+  }
+
+  .table-view {
+    padding: 12px;
+    overflow-x: auto;
+
+    ::ng-deep .ant-table {
+      min-width: 800px;
+    }
+  }
+}

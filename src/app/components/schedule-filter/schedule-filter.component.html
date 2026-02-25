@@ -1,0 +1,143 @@
+<div class="workbench-filter">
+  <form nz-form [formGroup]="filterForm">
+    <div class="filter-row filter-row-top">
+      <nz-radio-group class="status-segment" formControlName="statusSegment">
+        <label
+          *ngFor="let opt of statusSegmentOptions"
+          nz-radio-button
+          [nzValue]="opt.value"
+        >
+          {{ opt.label }}
+        </label>
+      </nz-radio-group>
+
+      <div class="filter-row-right">
+        <nz-input-group nzPrefixIcon="search" class="keyword-input">
+          <input nz-input formControlName="keyword" placeholder="患者/住院号/诊断/手术/医生" />
+        </nz-input-group>
+
+        <nz-select
+          class="urgency-select"
+          formControlName="urgency"
+          nzAllowClear
+          nzPlaceHolder="急/择"
+        >
+          <nz-option *ngFor="let u of urgencyOptions" [nzLabel]="u.label" [nzValue]="u.value"></nz-option>
+        </nz-select>
+
+        <nz-range-picker
+          class="date-range"
+          formControlName="dateRange"
+          nzFormat="yyyy-MM-dd"
+          [nzPlaceHolder]="['开始', '结束']"
+        ></nz-range-picker>
+
+        <button type="button" nz-button nzType="default" (click)="shiftDateRange(-1)">前一天</button>
+        <button type="button" nz-button nzType="default" (click)="setTodayRange()">今天</button>
+        <button type="button" nz-button nzType="default" (click)="shiftDateRange(1)">后一天</button>
+
+        <button type="button" nz-button nzType="link" (click)="toggleCollapse()">
+          <span *ngIf="!isCollapsed">更多筛选</span>
+          <span *ngIf="isCollapsed">收起</span>
+          <i nz-icon [nzType]="isCollapsed ? 'up' : 'down'"></i>
+        </button>
+
+        <button type="button" nz-button nzType="default" (click)="handleReset()">
+          <i nz-icon nzType="reload"></i>
+          重置
+        </button>
+      </div>
+    </div>
+
+    <div class="filter-advanced" [class.collapsed]="!isCollapsed">
+      <nz-row [nzGutter]="16">
+        <!-- 医生 -->
+        <nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6">
+          <nz-form-item>
+            <nz-form-label>医生</nz-form-label>
+            <nz-form-control>
+              <nz-select
+                formControlName="doctorName"
+                nzShowSearch
+                nzAllowClear
+                nzPlaceHolder="请选择医生"
+              >
+                <nz-option
+                  *ngFor="let doctor of doctorOptions"
+                  [nzLabel]="doctor"
+                  [nzValue]="doctor"
+                ></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </nz-col>
+
+        <!-- 手术室 -->
+        <nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6">
+          <nz-form-item>
+            <nz-form-label>手术室</nz-form-label>
+            <nz-form-control>
+              <nz-select
+                formControlName="operatingRoom"
+                nzShowSearch
+                nzAllowClear
+                nzPlaceHolder="请选择手术室"
+              >
+                <nz-option
+                  *ngFor="let room of operatingRoomOptions"
+                  [nzLabel]="room"
+                  [nzValue]="room"
+                ></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </nz-col>
+
+        <!-- 状态（多选） -->
+        <nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6">
+          <nz-form-item>
+            <nz-form-label>状态</nz-form-label>
+            <nz-form-control>
+              <nz-select
+                formControlName="status"
+                nzMode="multiple"
+                nzShowSearch
+                nzAllowClear
+                nzPlaceHolder="请选择状态"
+              >
+                <nz-option
+                  *ngFor="let status of statusOptions"
+                  [nzLabel]="status.label"
+                  [nzValue]="status.value"
+                >
+                  <span [style.color]="status.color">{{ status.label }}</span>
+                </nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </nz-col>
+
+        <!-- 手术类型 -->
+        <nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6">
+          <nz-form-item>
+            <nz-form-label>手术类型</nz-form-label>
+            <nz-form-control>
+              <nz-select
+                formControlName="surgeryType"
+                nzShowSearch
+                nzAllowClear
+                nzPlaceHolder="请选择手术类型"
+              >
+                <nz-option
+                  *ngFor="let type of surgeryTypeOptions"
+                  [nzLabel]="type"
+                  [nzValue]="type"
+                ></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </nz-col>
+      </nz-row>
+    </div>
+  </form>
+</div>
